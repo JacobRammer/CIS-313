@@ -1,0 +1,7 @@
+init array [0, 1] len = 2
+given int n -> if n is less than the length -> access it from the array
+if n is longer -> perform calculation -> for loop:
+for i in range(start, stop, stage) any number for start and stop, 1 for stage
+for i in range n:
+add array[i-1] + array[i + 2]
+print
