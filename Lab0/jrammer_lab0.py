@@ -14,7 +14,7 @@ class FibSequence:
         self.fib_num = 0
         self.ord_indicator = ""
 
-    def calculate(self, n: int):
+    def compute(self, n: int):
         """
         Method to calculate the fibonacci sequence by appending
         to a list.
@@ -31,13 +31,15 @@ class FibSequence:
         """
         Dynamically updates the ordinal indicator to the proper
         format. 1st, 2nd, 3rd etc
+        Reverse number as the ordinal indicator is based of the
+        last digit.
         :param n: nth Fibonacci number
         :return: void
         """
 
         temp_val = str(n)  # cast n to str to keep ifs cleaner
 
-        if 10 < int(temp_val) < 20:  # teens are a special case
+        if 10 < int(temp_val) < 20:  # teens are a special case and only ones I can think of
             self.ord_indicator = "th"
         elif temp_val[::-1][0] == "1":
             self.ord_indicator = "st"
@@ -51,7 +53,7 @@ class FibSequence:
 
 def main():
     """
-    Main function bla bla yada yada
+    Main function. Asks for input and validates input
     :return: void
     """
 
@@ -66,11 +68,11 @@ def main():
             nth_fib = int(nth_fib)
             if int(nth_fib) > 0:
                 fib_num = FibSequence()
-                fib_num.calculate(int(nth_fib))
+                fib_num.compute(int(nth_fib))
                 print(f"The {nth_fib}{fib_num.ord_indicator} Fibonacci number is: {fib_num.fib_num}\n")
             else:
-                print("Please enter a positive integer or \'q\'")
-        except ValueError:  # if a single char is entered, don't crash
+                print("Please enter a positive integer or \'q\'\n")
+        except ValueError:  # if non-valid input is entered, don't crash
             print("Please enter a positive integer or \'q\'\n")
 
 
