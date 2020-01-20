@@ -19,7 +19,7 @@ class Queue:
         self.current_size = 0
         self.data = []  # will need to change datatype to linked list later
 
-    def is_empty(self) -> bool:
+    def isEmpty(self) -> bool:
         """
         Checks to see if the current queue is empty
         :return: true if empty, otherwise false
@@ -27,7 +27,7 @@ class Queue:
 
         return self.current_size == 0
 
-    def is_full(self) -> bool:
+    def isFull(self) -> bool:
         """
         Checks to see if the current queue is full
         :return: true if full, otherwise false
@@ -42,7 +42,7 @@ class Queue:
         :return: mealticket or false
         """
 
-        if self.is_empty():
+        if self.isEmpty():
             return False
         return self.data[self.head]
 
@@ -53,7 +53,7 @@ class Queue:
         :return: true if successful, otherwise false
         """
 
-        if self.is_full():
+        if self.isFull():
             return False
         self.tail = (self.tail + 1) % self.max_size
         self.data.append(ticket)
@@ -66,7 +66,7 @@ class Queue:
         :return: mealticket if queue has data, false if queue is empty
         """
 
-        if self.is_empty():
+        if self.isEmpty():
             return False
         ticket = self.data[self.head]
         self.head = (self.head + 1) % self.max_size
@@ -85,7 +85,7 @@ class Stack:
         self.current_size = 0
         self.data = []  # need to change to linked list
 
-    def is_empty(self) -> bool:
+    def isEmpty(self) -> bool:
         """
         Checks to see if the stack is empty
         :return: True is empty, otherwise false
@@ -93,7 +93,7 @@ class Stack:
 
         return self.current_size == 0
 
-    def is_full(self) -> bool:
+    def isFull(self) -> bool:
         """
         Checks to see if the stack is full
         :return: true if full, otherwise false
@@ -107,7 +107,7 @@ class Stack:
         :return: True if successful, otherwise false
         """
 
-        if self.is_full():
+        if self.isFull():
             return False
         self.data.append(ticket)
         self.current_size += 1
@@ -119,7 +119,7 @@ class Stack:
         :return: Mealticket if stack has data, otherwise false
         """
 
-        if self.is_empty():
+        if self.isEmpty():
             return False
         self.head -= 1
         self.current_size -= 1
@@ -131,26 +131,76 @@ class Stack:
         :return: Mealticket is stack has data, otherwise false
         """
 
-        if self.is_empty():
+        if self.isEmpty():
             return False
         return self.data[0]
 
 
+class Node:
+    """
+    This class will be the node for the linked list
+    """
+
+    def __init__(self, data: MealTicket):
+        self.data = data
+        self.next = None  # Just like ll in c, start as NULL
+
+
+class LinkedList:
+
+    def __init__(self):
+        self.head = None
+
+    def newNode(self, data: MealTicket):
+        """
+        Insert data at the end of the linked list
+        :param data: Mealticket
+        :return: void
+        """
+
+        node = Node(data)
+        if self.head is None:  # if list is empty
+            self.head = node.data
+            return
+        temp = self.head
+        while temp.next:  # until None is reached
+            temp = temp.next
+        temp.next = node.data
+
+    def displayList(self):
+        """
+        Simple method to print the linked list
+        :return: void
+        """
+
+        temp = self.head
+        while temp:
+            print(temp.data)
+            temp = temp.next
+
+
 def main():
-    test = Queue(2)
+    # test = Queue(2)
     # print(test.is_empty())
     # print(test.is_full())
     # print(test.enqueue("test"))
     # print(test.dequeue())
 
-    stack = Stack(2)
+    # stack = Stack(2)
     # stack.current_size = 2
     # print(stack.is_empty())
     # print(stack.is_full())
-    print(stack.push("test"))
+    # print(stack.push("test"))
     # print(stack.pop())
     # print(stack.pop())
-    print(stack.peek())
+    # print(stack.peek())
+
+    linked_list = LinkedList()
+    first = Node(1)
+    second = Node(2)
+    linked_list.newNode(first)
+    linked_list.newNode(second)
+    linked_list.displayList()
 
 
 main()
