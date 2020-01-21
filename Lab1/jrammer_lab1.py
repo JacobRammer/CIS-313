@@ -42,7 +42,6 @@ class Queue:
         the dataset.
         :return: mealticket or false
         """
-        # TODO fix this
 
         if self.isEmpty():
             return False
@@ -89,10 +88,10 @@ class Stack:
     """
 
     def __init__(self, size: int):
-        self.head = 0
+        self.head = None
         self.max_size = size
         self.current_size = 0
-        self.data = []  # need to change to linked list
+        # self.data = []  # need to change to linked list
 
     def isEmpty(self) -> bool:
         """
@@ -110,7 +109,7 @@ class Stack:
 
         return self.current_size == self.max_size
 
-    def push(self, ticket: str) -> bool:
+    def push(self, ticket: MealTicket) -> bool:
         """
         If the stack is empty, append the newest data to top of the stack
         :return: True if successful, otherwise false
@@ -118,9 +117,14 @@ class Stack:
 
         if self.isFull():
             return False
-        self.data.append(ticket)
+        if self.head is None:
+            self.head = Node(ticket)
+        else:
+            new_node = Node(ticket)
+            new_node.next = self.head  # lifo
+            self.head = new_node
         self.current_size += 1
-        self.head += 1
+        return True
 
     def pop(self) -> MealTicket or False:
         """
@@ -130,9 +134,11 @@ class Stack:
 
         if self.isEmpty():
             return False
-        self.head -= 1
+        temp_val = self.head
+        self.head = self.head.next
+        temp_val.next = None
         self.current_size -= 1
-        return self.data[self.head]
+        return temp_val.data
 
     def peek(self) -> MealTicket or False:
         """
@@ -142,7 +148,7 @@ class Stack:
 
         if self.isEmpty():
             return False
-        return self.data[0]
+        return self.head.data
 
 
 class Node:
@@ -189,6 +195,7 @@ class LinkedList:
 
 
 def main():
+
     # test = Queue(2)
     # print(test.is_empty())
     # print(test.is_full())
@@ -211,18 +218,39 @@ def main():
     # linked_list.newNode(second)
     # linked_list.displayList()
 
-    q = Queue(4)
-    print(f"Enqueue {q.enqueue(5)}")
-    print(f"Enqueue {q.enqueue(4)}")
-    print(f"Enqueue {q.enqueue(3)}")
+    # q = Queue(4)
+    # print(f"Enqueue {q.enqueue(5)}")
+    # print(f"Enqueue {q.enqueue(4)}")
+    # print(f"Enqueue {q.enqueue(3)}")
+    #
+    # print(f"front: {q.front()}")
+    # print(f"Dequeue {q.dequeue()}")
+    # print(f"front: {q.front()}")
+    # print(f"Enqueue {q.enqueue(20)}")
+    # print(f"Dequeue {q.dequeue()}")
+    # print(f"Dequeue {q.dequeue()}")
+    # print(f"front: {q.front()}")
 
-    print(f"front: {q.front()}")
-    print(f"Dequeue {q.dequeue()}")
-    print(f"front: {q.front()}")
-    print(f"Enqueue {q.enqueue(20)}")
-    print(f"Dequeue {q.dequeue()}")
-    print(f"Dequeue {q.dequeue()}")
-    print(f"front: {q.front()}")
+    # s = Stack(2)
+    # print(f"Push {s.push(5)}")
+    # print(f"Push {s.push(4)}")
+    # print(f"Push {s.push(3)}")
+    # print(f"pop {s.pop()}")
+    # print(f"pop {s.pop()}")
+    # print(f"peek {s.peek()}")
+
+    # s = Stack(4)
+    #
+    # my_ticket = MealTicket("Jared's Breakfast")
+    # my_ticket.addItem(("Eggs", 4.50))  # adding items as a tuple
+    # my_ticket.addItem(("Bacon", 2.50))
+    # my_ticket.addItem(("OJ", 1.00))
+    #
+    # print(f"Enqueue {s.push(my_ticket)}")
+    # t = s.pop()
+    # print(f"{t.display()}")
+    pass
 
 
-main()
+if __name__ == "__main__":
+    main()
