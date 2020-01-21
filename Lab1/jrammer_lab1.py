@@ -13,11 +13,11 @@ class Queue:
         :return: void
         """
 
-        self.head = 0
+        self.head = None
+        self.tail = None
         self.max_size = size
-        self.tail = self.max_size - 1
         self.current_size = 0
-        self.data = []  # will need to change datatype to linked list later
+        # self.data = []  # will need to change datatype to linked list later
 
     def isEmpty(self) -> bool:
         """
@@ -38,15 +38,17 @@ class Queue:
     def front(self) -> MealTicket or False:
         """
         Display the front mealticket if the queue has data.
-        If the queue is empty, return false
+        If the queue is empty, return false. Do not modify
+        the dataset.
         :return: mealticket or false
         """
+        # TODO fix this
 
         if self.isEmpty():
             return False
-        return self.data[self.head]
+        return self.head.data
 
-    def enqueue(self, ticket: str) -> bool:
+    def enqueue(self, ticket: MealTicket) -> bool:
         """
         Enqueue a mealticket. Move the tail pointer back 1 and increase size
         :param ticket: Mealticket
@@ -55,10 +57,17 @@ class Queue:
 
         if self.isFull():
             return False
-        self.tail = (self.tail + 1) % self.max_size
-        self.data.append(ticket)
+        if self.tail is None:
+            self.head = Node(ticket)
+            self.tail = self.head
+        else:
+            self.tail.next = Node(ticket)
+            self.tail = self.tail.next
         self.current_size += 1
         return True
+        # self.data.append(ticket)
+        # self.current_size += 1
+        # return True
 
     def dequeue(self) -> MealTicket or False:
         """
@@ -68,8 +77,8 @@ class Queue:
 
         if self.isEmpty():
             return False
-        ticket = self.data[self.head]
-        self.head = (self.head + 1) % self.max_size
+        ticket = self.head.data
+        self.head = self.head.next
         self.current_size -= 1
         return ticket
 
@@ -195,12 +204,25 @@ def main():
     # print(stack.pop())
     # print(stack.peek())
 
-    linked_list = LinkedList()
-    first = Node(1)
-    second = Node(2)
-    linked_list.newNode(first)
-    linked_list.newNode(second)
-    linked_list.displayList()
+    # linked_list = LinkedList()
+    # first = Node(1)
+    # second = Node(2)
+    # linked_list.newNode(first)
+    # linked_list.newNode(second)
+    # linked_list.displayList()
+
+    q = Queue(4)
+    print(f"Enqueue {q.enqueue(5)}")
+    print(f"Enqueue {q.enqueue(4)}")
+    print(f"Enqueue {q.enqueue(3)}")
+
+    print(f"front: {q.front()}")
+    print(f"Dequeue {q.dequeue()}")
+    print(f"front: {q.front()}")
+    print(f"Enqueue {q.enqueue(20)}")
+    print(f"Dequeue {q.dequeue()}")
+    print(f"Dequeue {q.dequeue()}")
+    print(f"front: {q.front()}")
 
 
 main()
