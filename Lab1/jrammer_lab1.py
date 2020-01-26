@@ -6,7 +6,7 @@ class Queue:
     A standard queue class. First in first out
     """
 
-    def __init__(self, size: int):
+    def __init__(self, size):
         """
         Init method for queue class.
         :param size: the max size of the queue
@@ -19,7 +19,7 @@ class Queue:
         self.current_size = 0
         # self.data = []  # will need to change datatype to linked list later
 
-    def isEmpty(self) -> bool:
+    def isEmpty(self):
         """
         Checks to see if the current queue is empty
         :return: true if empty, otherwise false
@@ -27,7 +27,7 @@ class Queue:
 
         return self.current_size == 0
 
-    def isFull(self) -> bool:
+    def isFull(self):
         """
         Checks to see if the current queue is full
         :return: true if full, otherwise false
@@ -35,7 +35,7 @@ class Queue:
 
         return self.max_size == self.current_size
 
-    def front(self) -> MealTicket or False:
+    def front(self):
         """
         Display the front mealticket if the queue has data.
         If the queue is empty, return false. Do not modify
@@ -47,28 +47,27 @@ class Queue:
             return False
         return self.head.data
 
-    def enqueue(self, ticket: MealTicket) -> bool:
+    def enqueue(self, ticket):
         """
         Enqueue a mealticket. Move the tail pointer back 1 and increase size
         :param ticket: Mealticket
         :return: true if successful, otherwise false
         """
 
-        if self.isFull():
-            return False
-        if self.tail is None:
-            self.head = Node(ticket)
-            self.tail = self.head
-        else:
-            self.tail.next = Node(ticket)
-            self.tail = self.tail.next
-        self.current_size += 1
-        return True
-        # self.data.append(ticket)
-        # self.current_size += 1
-        # return True
+        if isinstance(ticket, MealTicket):
+            if self.isFull():
+                return False
+            if self.tail is None:  # node is empty
+                self.head = Node(ticket)
+                self.tail = self.head
+            else:
+                self.tail.next = Node(ticket)
+                self.tail = self.tail.next
+            self.current_size += 1
+            return True
+        return False  # if ticket is not a mealticket
 
-    def dequeue(self) -> MealTicket or False:
+    def dequeue(self):
         """
         Remove the ticket at the front of the queue
         :return: mealticket if queue has data, false if queue is empty
@@ -87,13 +86,13 @@ class Stack:
     Stacks are first in last out
     """
 
-    def __init__(self, size: int):
+    def __init__(self, size):
         self.head = None
         self.max_size = size
         self.current_size = 0
         # self.data = []  # need to change to linked list
 
-    def isEmpty(self) -> bool:
+    def isEmpty(self):
         """
         Checks to see if the stack is empty
         :return: True is empty, otherwise false
@@ -101,7 +100,7 @@ class Stack:
 
         return self.current_size == 0
 
-    def isFull(self) -> bool:
+    def isFull(self):
         """
         Checks to see if the stack is full
         :return: true if full, otherwise false
@@ -109,24 +108,25 @@ class Stack:
 
         return self.current_size == self.max_size
 
-    def push(self, ticket: MealTicket) -> bool:
+    def push(self, ticket):
         """
         If the stack is empty, append the newest data to top of the stack
         :return: True if successful, otherwise false
         """
 
-        if self.isFull():
-            return False
-        if self.head is None:
-            self.head = Node(ticket)
-        else:
-            new_node = Node(ticket)
-            new_node.next = self.head  # lifo
-            self.head = new_node
-        self.current_size += 1
-        return True
+        if isinstance(ticket, MealTicket):  # only want to push mealtickets
+            if self.isFull():
+                return False
+            if self.head is None:
+                self.head = Node(ticket)
+            else:
+                new_node = Node(ticket)
+                new_node.next = self.head  # lifo
+                self.head = new_node
+            self.current_size += 1
+            return True
 
-    def pop(self) -> MealTicket or False:
+    def pop(self):
         """
         Get the last datatype from the top of the stack.
         :return: Mealticket if stack has data, otherwise false
@@ -140,7 +140,7 @@ class Stack:
         self.current_size -= 1
         return temp_val.data
 
-    def peek(self) -> MealTicket or False:
+    def peek(self):
         """
         Peek at the first element of the stack without deleting the item
         :return: Mealticket is stack has data, otherwise false
@@ -156,42 +156,9 @@ class Node:
     This class will be the node for the linked list
     """
 
-    def __init__(self, data: MealTicket):
+    def __init__(self, data):
         self.data = data
         self.next = None  # Just like ll in c, start as NULL
-
-
-class LinkedList:
-
-    def __init__(self):
-        self.head = None
-
-    def newNode(self, data: MealTicket):
-        """
-        Insert data at the end of the linked list
-        :param data: Mealticket
-        :return: void
-        """
-
-        node = Node(data)
-        if self.head is None:  # if list is empty
-            self.head = node.data
-            return
-        temp = self.head
-        while temp.next:  # until None is reached
-            temp = temp.next
-        temp.next = node.data
-
-    def displayList(self):
-        """
-        Simple method to print the linked list
-        :return: void
-        """
-
-        temp = self.head
-        while temp:
-            print(temp.data)
-            temp = temp.next
 
 
 def main():
@@ -249,7 +216,14 @@ def main():
     # print(f"Enqueue {s.push(my_ticket)}")
     # t = s.pop()
     # print(f"{t.display()}")
-    pass
+
+    # s = Stack(3)
+    # print(s.push(ticket1))
+
+    q = Queue(5)
+    print(q.enqueue(ticket1))
+    t = q.dequeue()
+    print(t.display())
 
 
 if __name__ == "__main__":
