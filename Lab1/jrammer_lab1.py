@@ -104,6 +104,7 @@ class Stack:
 
         if not isinstance(size, int) or size <= 0:
             size = 0  # checking for string or negative number
+            print("here")
         self.head = None
         self.maxSize = size
         self.currentSize = 0
@@ -182,3 +183,4 @@ class Node:
 
         self.data = data
         self.next = None  # Just like ll in c, start as NULL
+
