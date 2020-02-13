@@ -5,6 +5,7 @@ Date: 01/14/2020
 Notes:
     1. This program contains the meal ticket class developed in the video tutorial.
 """
+from random import uniform
 
 
 class MealTicket():
@@ -31,7 +32,8 @@ class MealTicket():
         print("Total Cost: ", round(self.totalCost, 2))
         print("Ticket Items: ")
         for i in range(0, len(self.items)):
-            print("  Item name: ", self.items[i][0], " -- Item cost: ", self.items[i][1])
+            print("  Item name: ", self.items[i][0], " -- Item cost: ",
+                  self.items[i][1])
         print("========== End ==========\n")
 
 
@@ -51,6 +53,21 @@ ticket4 = MealTicket("Jared's Snacks")
 ticket4.addItem(("Dragon Fruit", 8.50))
 ticket4.addItem(("Strawberry", 3.25))
 ticket4.addItem(("Passion Fruit", 4.50))
+
+import pprint
+
+
+# added a function that outputs an array of mealtickets so we gots mo data
+def generateMealTickets(size):
+    """ Generates an array of mealtickets based on the integer <size> """
+    mealtickets = []
+    vals = [33.45, 45.82, 36.87, 43.88, 40.09, 20.6, 30.07, 28.99]
+    for i in range(size):
+        ticket = MealTicket("Jared's Meal " + str(i))
+        ticket.addItem(("Item 1", float(vals[i]), 2))
+        mealtickets.append(ticket)
+    return mealtickets
+
 
 if (__name__ == "__main__"):
     def main():
