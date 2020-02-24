@@ -168,9 +168,9 @@ class PriorityQueue:
 
 
 def main():
-    # pq = PriorityQueue(10)
-    # pq.insert(ticket2)
-    # print(pq)
+    pq = PriorityQueue(-10)
+    pq.insert(ticket2)
+    print(pq)
     # pq.insert(ticket2)
     # print(pq)
     # for i in range(1, pq._maxSize):
@@ -188,7 +188,7 @@ def main():
     # test2 = pq.extractMax()
     # print(test.totalCost)
     # print(test2.totalCost)
-    pass
+    # pass
 
 
 main()
