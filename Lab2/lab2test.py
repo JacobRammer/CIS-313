@@ -1,10 +1,4 @@
-"""
-Jacob Rammer
-Lab 02
-2/8/2020
-"""
 from random import randint
-from mealticket import *
 
 
 class PriorityQueue:
@@ -14,13 +8,13 @@ class PriorityQueue:
 
     def __init__(self, maxSize):
         """
-        Init method for pq
+        Init methos for pq
         :param maxSize: max size of the pq
         """
 
-        self._maxSize = maxSize
+        self._maxSize = maxSize + 1
         self._length = 0
-        self._heap = []
+        self._heap = [None] * self._maxSize
 
     def isFull(self):
         """
@@ -78,17 +72,17 @@ class PriorityQueue:
         rightChild = self.getRightChild(index)
 
         if self._length >= leftChild > 0:
-            if self._heap[leftChild].totalCost > self._heap[largest].totalCost:
+            if self._heap[leftChild] > self._heap[largest]:
                 largest = leftChild
         if self._length >= rightChild > 0:
-            if self._heap[rightChild].totalCost > self._heap[largest].totalCost:
+            if self._heap[rightChild] > self._heap[largest]:
                 largest = rightChild
         if largest != index:
             self._heap[index], self._heap[largest] = \
                 self._heap[largest], self._heap[index]
             self.heapify(largest)
 
-    def swap(self, index):
+    def increaseKey(self, index):
         """
         Swap parent and child nodes if required
         :param index: index to check
@@ -96,8 +90,7 @@ class PriorityQueue:
         """
 
         parent = self.getParent(index)
-        while index > 0 and \
-                self._heap[parent].totalCost < self._heap[index].totalCost:
+        while index > 1 and self._heap[parent] < self._heap[index]:
             self._heap[index], self._heap[parent] = \
                 self._heap[parent], self._heap[index]
             index = self.getParent(index)
@@ -113,11 +106,11 @@ class PriorityQueue:
         :return: true if successful
         """
 
-        if self.isFull() or type(ticket) is not MealTicket:
+        if self.isFull():
             return False
-        self._heap.append(ticket)
-        self.swap(self._length)
         self._length += 1
+        self._heap[self._length] = ticket
+        self.increaseKey(self._length)
         return True
 
     def extractMax(self):
@@ -129,10 +122,10 @@ class PriorityQueue:
 
         if self.isEmpty():
             return False
-        maxTicket = self._heap[0]
+        maxTicket = self._heap[1]
+        self._heap[1] = self._heap[self._length]
         self._length -= 1
-        del self._heap[0]
-        self.heapify(0)
+        self.heapify(1)
         return maxTicket
 
     def __str__(self):
@@ -142,7 +135,9 @@ class PriorityQueue:
         Description: Output the current queue as a string.
         Inputs: None
         Outputs: str
+        :return:
         """
+
         returnValue = "Current queue: ["
         if (self._length != 0):
             for ticket in self._heap:
@@ -151,44 +146,28 @@ class PriorityQueue:
                 else:
                     returnValue += "(" + str(ticket.ticketID) + ", "
                     returnValue += str(ticket.totalCost) + "), "
-            returnValue = returnValue[:-2] + "]"
-        else:
-            returnValue += "]"
+                    returnValue = returnValue[:-2] + "]"
+            else:
+                returnValue += "]"
+
         return returnValue
-
-    def maximum(self):
-        """
-        peek at the maximum ticket
-        :return: false if empty
-        """
-
-        if self.isEmpty():
-            return False
-        return self._heap[0]
 
 
 def main():
-    pq = PriorityQueue(-10)
-    pq.insert(ticket2)
-    print(pq)
-    # pq.insert(ticket2)
-    # print(pq)
-    # for i in range(1, pq._maxSize):
-    #     test = randint(1, 50)
-    #     print(pq.insert(test))
-    # print(pq._heap)
-    # for i in range(pq._length):
-    #     print(pq.extractMax())
+    pq = PriorityQueue(10)
 
-    # print(pq._heap)
-    # pq.insert(ticket1)
-    # pq.insert(ticket2)
-    # print(pq._heap)
-    # test = pq.extractMax()
-    # test2 = pq.extractMax()
-    # print(test.totalCost)
-    # print(test2.totalCost)
-    # pass
+    # pq.insert(5)
+    # pq.insert(8)
+    # pq.insert(9)
+    # pq.insert((10))
+    # pq.insert(6)
+    # pq.insert(15)
+    for i in range(1, pq._maxSize):
+        test = randint(1, 50)
+        print(pq.insert(test))
+    print(pq._heap)
+    for i in range(pq._length):
+        print(pq.extractMax())
 
 
 main()
