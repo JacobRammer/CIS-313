@@ -27,7 +27,7 @@ class BSTNode:
         """
         Debugger function that will be used in the repr.
         Calculates the how complete the tree is
-        :return: int
+        :return: number of children
         """
 
         number = 0
@@ -107,17 +107,17 @@ class BinarySearchTree:
         #     y.right = ticket
 
         ticketNode = BSTNode(ticket)
-        flag = False  # since we're using 1 return
+        returnVal = False  # since we're using 1 return
         if type(ticket) is not MealTicket:
             print("From insert: ticket type is not mealticket")
         else:
             if self._root is None:  # nothing in the tree
                 self._root = ticketNode
-                flag = True
+                returnVal = True
             else:  # tree has elements, need to maintain order r > l
                 self.recursiveInsert(ticket, self._root)
-                flag = True
-        return flag
+                returnVal = True
+        return returnVal
 
     def recursiveInsert(self, ticket, root):
         """
@@ -169,19 +169,41 @@ class BinarySearchTree:
         if nodeV is not None:
             nodeV.parent = nodeU.parent
 
+    def deleteFind(self, id):
+        """
+        Function to call _find recursively because you
+        can't call methods with self._root as an argument.
+        Used to return the correct type for deletion which
+        is a BSTNode
+        :param id: id of mealticket
+        :return: the BSTNode containing the MT, or false if not found
+        """
+
+        returnVal = False
+        if self._root is None:
+            return False
+        else:
+            return self._find(self._root, id) or returnVal
+
     def find(self, id):
         """
         Function to call _find recursively because you
         can't call methods with self._root as an argument
         :param id: id of mealticket
-        :return: the BST containing the MT, or false if not found
+        :return: the mealticket, or false if not found
         """
 
-        flag = False
-        if self._root is None:
-            return False
-        else:
-            return self._find(self._root, id) or flag
+        returnVal = False
+        if type(id) is int:
+            if self._root is None:
+                returnVal = False
+            else:
+                returnVal = self._find(self._root, id)
+                if returnVal is not None:
+                    returnVal = returnVal.key
+                else:
+                    returnVal = False
+        return returnVal
 
     def _find(self, node, id):
         """
@@ -191,30 +213,32 @@ class BinarySearchTree:
         :return: mealticket if in BST, else false
         """
 
-        flag = None
-        if flag is not False:  #
-            if id == node.key.ticketID:
-                flag = node.key
-            elif id < node.key.ticketID and node.left is not None:
-                flag = self._find(node.left, id)
-            elif id > node.key.ticketID and node.right is not None:
-                flag = self._find(node.right, id)
-        if type(flag) is BSTNode:  # hackjob to keep it from shitting the bed
-            flag = flag.key
-        return flag
+        returnVal = None
+        # if returnVal is not False:  #
+        temp = node.key.ticketID
+        if id == node.key.ticketID:
+            returnVal = node
+        elif id < node.key.ticketID and node.left is not None:
+            returnVal = self._find(node.left, id)
+        elif id > node.key.ticketID and node.right is not None:
+            returnVal = self._find(node.right, id)
+        return returnVal
 
     def delete(self, ticketID):
         """
         Find the node in the tree then pass the node
         to the deleteNode method. I originally used self._root
         in the call which is why I needed this function.
-        But then got it to work without is. But now I cant get
-        it to work if I remove this method, so it says
+        This returns the mealticket object, not BST node like
+        deleteNode does.
         :param ticketID: ID of mealticket
         :return:true if successful, else false
         """
 
-        return self.deleteNode(self.find(ticketID))
+        returnVal = False
+        if type(ticketID) is int:
+            returnVal = self.deleteNode(self.deleteFind(ticketID))
+        return returnVal
 
     def children(self, node):
         """
@@ -237,10 +261,10 @@ class BinarySearchTree:
         :return:true if delete is successful, else false
         """
 
-        flag = False
+        returnVal = False
         if node is None or node is False:
             '''There is nothing in the tree or not found'''
-            pass
+            print("Failed at deleteNode")
         else:
             parent = node.parent
             numChildren = self.children(node)
@@ -254,7 +278,7 @@ class BinarySearchTree:
                         parent.right = None
                 else:
                     self._root = None
-                flag = True
+                returnVal = True
 
             if numChildren == 1:
                 '''Parent only has a single child'''
@@ -270,24 +294,29 @@ class BinarySearchTree:
                 else:
                     self._root = child
                 child.parent = parent
-                flag = True
+                returnVal = True
 
             if numChildren == 2:
                 '''Parent has two children'''
                 minVal = self.min(node.right)
-                node.key = minVal.key
-                self.deleteNode(minVal)
-                flag = True
-        return flag
+                # if minVal is not None:
+                if minVal is not None:
+                    node.key = minVal.key
+                    self.deleteNode(minVal)
+                    returnVal = True
+        return returnVal
 
     def min(self, node):
         """
         Helper function for delete to find the min val
+        I dont need this function anymore. I had a bug I
+        spent 2 hours trying to fix, because i was using
+        self._root instead of node like a dummy
         :param node: BSTnode
         :return: void
         """
 
-        return self._min(self._root.left)
+        return self._min(node)
 
     def _min(self, node):
         """
@@ -296,8 +325,10 @@ class BinarySearchTree:
         :return: value of min child
         """
 
-        while node.left is not None:
-            node = node.left
+        if node is not None:
+            '''Had one random crash without this'''
+            while node.left is not None:
+                node = node.left
         return node
 
     # def delete(self, id):
@@ -398,17 +429,59 @@ def main():
     p = BSTNode(6)
     r = BSTNode(7)
     l = BSTNode(5)
-    ticket1.ticketID = 6
-    ticket2.ticketID = 7
-    ticket3.ticketID = 5
-    print(bst.insert(ticket1))
-    print(bst.insert(ticket2))
-    print(bst.insert(ticket3))
-    print(bst.delete(8))
+    # ticket2.ticketID = 7
+    # ticket3.ticketID = 5
+    # print(bst.insert(ticket1))
+    # print(bst.insert(ticket2))
+    # print(bst.insert(ticket3))
+    r8 = MealTicket("r8")
+    r8.ticketID = 8
+    r5 = MealTicket("5")
+    r5.ticketID = 5
+    r2 = MealTicket("2")
+    r2.ticketID = 2
+    r3 = MealTicket("3")
+    r3.ticketID = 3
+    r4 = MealTicket("4")
+    r4.ticketID = 4
+    r1 = MealTicket("1")
+    r1.ticketID = 1
+    r7 = MealTicket("7")
+    r7.ticketID = 7
+    r6 = MealTicket("6")
+    r6.ticketID = 6
+
+    print(bst.insert(r5))
+    print(bst.insert(r2))
+    print(bst.insert(r6))
+    print(bst.insert(r7))
+    print(bst.insert(r1))
+    print(bst.insert(r4))
+    print(bst.insert(r3))
+    print(bst.insert(r8))
     print(bst.traverse("in-order"))
     print(bst.traverse("pre-order"))
     print(bst.traverse("post-order"))
-    print(f"Find: {bst.find(5)}")
+    # print(bst.delete(3))
+    # print(bst.children(bst._root.left.right))
+    print(bst.delete(6))
+    print(bst.delete(4))
+    print(bst.delete(2))
+    # print(bst.find(4))
+
+    # print(bst.delete(7))
+    # print(bst.delete(2))
+    # print(bst.delete(6))
+    # print(bst.delete(8))
+
+    #
+    #
+    # print(bst.delete("3"))
+    # print(bst.find("2"))
+    # print(bst.traverse("in-order"))
+    # print(bst.traverse("post-order"))
+    # print(bst.traverse("pre-order"))
+    # print(f"Find: {bst.find(5)}")
     # t1 = bst.find(5)
     # t2 = bst.find(6)
     # t3 = bst.find(7)
@@ -451,4 +524,5 @@ def main():
     # print(bst.inOrder(bst, "in-order"))
 
 
-main()
+if __name__ == "__main__":
+    main()

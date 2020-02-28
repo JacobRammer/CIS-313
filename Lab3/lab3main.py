@@ -52,7 +52,7 @@ def main():
     length = randint(1, size)
     ids = ids[:length]  # shorten list to random length 1..size
     for i in ids:
-        res = bst.deleteNode(i)
+        res = bst.delete(i)
         print("Remove", str(i) + ":", res)
     print()
 
