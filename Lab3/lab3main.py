@@ -51,6 +51,7 @@ def main():
     # change the below line if you want to delete a certain number of nodes
     length = randint(1, size)
     ids = ids[:length]  # shorten list to random length 1..size
+    print(bst._search(5))
     for i in ids:
         res = bst.delete(i)
         print("Remove", str(i) + ":", res)
@@ -61,7 +62,7 @@ def main():
     print("In-order:", bst.traverse("in-order"))
     print("Pre-order:", bst.traverse("pre-order"))
     print("Post-order:", bst.traverse("post-order"))
-    print()
+    print(bst._search(5))
 
     return
 

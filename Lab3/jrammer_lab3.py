@@ -2,6 +2,8 @@
 Jacob Rammer
 Lab 3
 2/24/2020
+LIES: you said third one is easier than
+lab 2. It was not lmao
 """
 from mealticket import *
 
@@ -451,7 +453,7 @@ def main():
     r6 = MealTicket("6")
     r6.ticketID = 6
 
-    print(bst.insert(r5))
+    print(bst.insert("r5"))
     print(bst.insert(r2))
     print(bst.insert(r6))
     print(bst.insert(r7))
@@ -464,7 +466,7 @@ def main():
     print(bst.traverse("post-order"))
     # print(bst.delete(3))
     # print(bst.children(bst._root.left.right))
-    print(bst.delete(6))
+    print(bst.find("6"))
     print(bst.delete(4))
     print(bst.delete(2))
     # print(bst.find(4))
