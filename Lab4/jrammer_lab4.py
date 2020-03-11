@@ -16,7 +16,7 @@ class RBNode:
     Node for a red black tree
     """
 
-    def __init__(self, ticket: MealTicket, color="red"):
+    def __init__(self, ticket, color="red"):
         """
         Init method for RBNode
         :param ticket: mealticket
@@ -86,7 +86,7 @@ class RedBlackTree:
             y.right.parent = x
         y.parent = x.parent
         if x.parent == self.nil:
-            self.root = RBNode(y)
+            self._root = y
         elif x == x.parent.right:
             x.parent.right = y
         else:
@@ -100,7 +100,6 @@ class RedBlackTree:
         :param ticket: mealticket
         :return: True if successful, else false
         """
-        # todo change "z" to "ticket"
 
         returnValue = False
         if type(ticket) is MealTicket:
@@ -129,53 +128,56 @@ class RedBlackTree:
             ticket.right = self.nil
             ticket.color = "red"
             # print(f"Z is {z}")
-            self.insertFixup(ticket)
+            # print(f"hgv {ticket}")
+            # self.insertFixup(ticket)
+            returnValue = True
 
         return returnValue
 
-    def insertFixup(self, z: RBNode):
+    def insertFixup(self, currentNode):
         """
         Fix the tree after inserting a mealticket
-        :param z: RBNode to perform the fixup
+        :param currentNode: RBNode to perform the fixup
         :return: void
         """
 
         black = "BLACK"  # so that i don't have to use the shift key
         red = "RED"  # don't use anyways i guess
         # print(f"Z2 is {z}")
-        while z.parent.color == "red":
+
+        while currentNode.parent.color == "red":
             # print(f"Z2 is {z}")
-            if z.parent == z.parent.parent.left:
-                y = z.parent.parent.right
+            if currentNode.parent == currentNode.parent.parent.left:
+                y = currentNode.parent.parent.right
                 if y.color == "red":
-                    z.parent.color = "black"
+                    currentNode.parent.color = "black"
                     y.color = "black"
-                    z.parent.parent.color = "red"
-                    z = z.parent.parent
+                    currentNode.parent.parent.color = "red"
+                    currentNode = currentNode.parent.parent
                 else:
-                    if z == z.parent.right:
-                        z = z.parent
-                        self._leftRotate(z)
-                    z.parent.color = "black"
-                    z.parent.parent.color = "red"
-                    self._rightRotate(z.parent.parent)
+                    if currentNode == currentNode.parent.right:
+                        currentNode = currentNode.parent
+                        self._leftRotate(currentNode)
+                    currentNode.parent.color = "black"
+                    currentNode.parent.parent.color = "red"
+                    self._rightRotate(currentNode.parent.parent)
             else:  # this is the same as above but left and right swap
-                y = z.parent.parent.left
+                y = currentNode.parent.parent.left
                 if y.color == "red":
-                    z.parent.color = "black"
+                    currentNode.parent.color = "black"
                     y.color = "black"
-                    z.parent.parent.color = "red"
-                    z = z.parent.parent
+                    currentNode.parent.parent.color = "red"
+                    currentNode = currentNode.parent.parent
                 else:
-                    if z == z.parent.left:
-                        z = z.parent
-                        self._rightRotate(z)
-                    z.parent.color = "black"
-                    z.parent.parent = "red"
-                    self._leftRotate(z.parent.parent)
+                    if currentNode == currentNode.parent.left:
+                        currentNode = currentNode.parent
+                        self._rightRotate(currentNode)
+                    currentNode.parent.color = "black"
+                    currentNode.parent.parent.color = "red"
+                    self._leftRotate(currentNode.parent.parent)
         self._root.color = "black"
 
-    def transplant(self, u: RBNode, v: RBNode):
+    def transplant(self, u, v):
         """
         Transplant a node during a deletion to maintain
         RBTree properties
@@ -194,7 +196,7 @@ class RedBlackTree:
 
         return True  # since we're just swapping, always true
 
-    def delete(self, z):
+    def delete(self, ticketID):
         """
         This deletes a child from a tree. Will need to
         call self.search to return the mealticket object
@@ -204,30 +206,31 @@ class RedBlackTree:
         """
 
         returnValue = False
-        z = self._search(z, self._root)
-        if z is not False:
-            y = z
+        tempVal = ticketID  # to validate input against 0
+        ticketID = self._search(ticketID, self._root)
+        if ticketID > 0:
+            y = ticketID
             original_color = y.color
-            if z.left == self.nil:
-                x = z.right
-                self.transplant(z, z.right)
-            elif z.right == self.nil:
-                x = z.left
-                self.transplant(z, z.left)
+            if ticketID.left == self.nil:
+                x = ticketID.right
+                self.transplant(ticketID, ticketID.right)
+            elif ticketID.right == self.nil:
+                x = ticketID.left
+                self.transplant(ticketID, ticketID.left)
             else:
-                y = self.min(z.right)
+                y = self.min(ticketID.right)
                 original_color = y.color
                 x = y.right
-                if y.parent == z:
+                if y.parent == ticketID:
                     x.parent = y
                 else:
                     self.transplant(y, y.right)
-                    y.right = z.right
+                    y.right = ticketID.right
                     y.right.parent = y
-                self.transplant(z, y)
-                y.left = z.left
+                self.transplant(ticketID, y)
+                y.left = ticketID.left
                 y.left.parent = y
-                y.color = z.color
+                y.color = ticketID.color
             if original_color == "black":
                 self.deleteFixup(x)
             returnValue = True
@@ -261,7 +264,7 @@ class RedBlackTree:
                 x.parent.color = "black"
                 w.right.color = "black"
                 self._leftRotate(x.parent)
-                x = self.root
+                x = self._root
             else:  # same as above but left and right are swapped
                 w = x.parent.left
                 if w.color == "red":
@@ -271,16 +274,17 @@ class RedBlackTree:
                 if w.right.color == "black" and w.left.color == "black":
                     w.color = "red"
                     x = x.parent
-                elif w.left.color == "black":
-                    w.right.color = "black"
-                    w.color = "red"
-                    self._leftRotate(w)
-                    w = x.parent.left
-                w.color = x.parent.color
-                x.parent.color = "black"
-                w.left.color = "black"
-                self._rightRotate(x.parent)
-                x = self.root
+                else:
+                    if w.left.color == "black":
+                        w.right.color = "black"
+                        w.color = "red"
+                        self._leftRotate(w)
+                        w = x.parent.left
+                    w.color = x.parent.color
+                    x.parent.color = "black"
+                    w.left.color = "black"
+                    self._rightRotate(x.parent)
+                    x = self._root
         x.color = "black"
 
     def min(self, currentTree):
@@ -310,7 +314,7 @@ class RedBlackTree:
         """
         Return a mealticket based on the mealticket ID
         :param id: mealticket id
-        :param node: tree
+        :param node: current node
         :return: RBTnode for delete
         """
 
@@ -337,7 +341,7 @@ class RedBlackTree:
         returnValue = False
         node = self._root
         # print(f"id {type(id)}")
-        if type(id) is int:
+        if type(id) is int and id > 0:
             # print("he")
             while node != self.nil and node.value != id:
                 if id < node.value:
@@ -348,7 +352,7 @@ class RedBlackTree:
                 returnValue = node.key
         return returnValue
 
-    def traversal(self, mode):
+    def traverse(self, mode):
         """
         Tree traversal depending on the mode
         :param mode: string of traversal mode
@@ -376,7 +380,7 @@ class RedBlackTree:
         if type(node) is RedBlackTree:
             node = self._root
         if node is not self.nil:
-            self.walk += f"{str(node.key.ticketID)}, "
+            self.walk += f"{str(node.key.ticketID)}: {node.color}, "
             self.preOrder(node.left)
             self.preOrder(node.right)
         return self.walk[:-2]
@@ -393,7 +397,7 @@ class RedBlackTree:
         if node is not self.nil:
             self.postOrder(node.left)
             self.postOrder(node.right)
-            self.walk += f"{str(node.key.ticketID)}, "
+            self.walk += f"{str(node.key.ticketID)}: {node.color}, "
         return self.walk[:-2]
 
     def inOrder(self, node):
@@ -404,7 +408,7 @@ class RedBlackTree:
 
         if node is not self.nil:
             self.inOrder(node.left)
-            self.walk += f"{str(node.key.ticketID)}, "
+            self.walk += f"{str(node.key.ticketID)}: {node.color}, "
             self.inOrder(node.right)
 
         return self.walk[:-2]
@@ -412,24 +416,44 @@ class RedBlackTree:
 
 def main():
     rb = RedBlackTree()
-    rb.insert(ticket2)
-    rb.insert(ticket3)
-    rb.insert(ticket1)
-
-    print(f"rb._root.color: {rb._root.color}")
-    print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
-
-    print(f"\nrb._root.right.color: {rb._root.right.color}")
-    print(f"rb._root.right.value: {rb._root.right.value}")
-
-    print(f"\nrb._root.left.color: {rb._root.left.color}")
-    print(f"rb._root.left.value: {rb._root.left.value}")
-
-    print(rb.traversal("in-order"))
-    print(rb.traversal("pre-order"))
-    print(rb.traversal("post-order"))
+    l = generateMealTickets(15)
+    for i in range(15):
+        # print(l[i])
+        print(rb.insert(l[i]))
+    print(rb.delete(5))
+    # print(rb._search(5, rb._root))
+    print(rb.traverse("in-order"))
+    # print(rb.traverse("post-order"))
+    # print(rb.traverse("pre-order"))
+    # ticket1.ticketID = 10
+    # print(f"Insert {rb.insert(ticket1)}")
+    # rb.delete(10)
+    # # print(f"Insert {rb.insert(ticket3)}")
+    # # print(f"Insert {rb.insert(ticket2)}")
+    # # print(f"Insert {rb.insert(ticket4)}")
+    # # print(f"Insert {rb.insert(ticket5)}")
+    # # rb.insertFixup(rb._root)
+    # # print(rb.insert(ticket6))
+    # # print(rb._root.parent.right)
+    # # print(rb.delete(10))
+    # # print(rb.find(2))
+    # # print(f"Find {rb.find(18)}")
+    #
+    # # print(f"rb._root.color: {rb._root.color}")
+    # # print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
+    # #
+    # # print(f"\nrb._root.right.color: {rb._root.right.color}")
+    # # print(f"rb._root.right.value: {rb._root.right.value}")
+    # #
+    # # print(f"\nrb._root.left.color: {rb._root.left.color}")
+    # # print(f"rb._root.left.value: {rb._root.left.value}")
+    # #
+    # print(rb.traverse("in-order"))
+    # print(rb.traverse("pre-order"))
+    # print(rb.traverse("post-order"))
 
     # print(rb._search(3, rb._root).value)
+    # print(rb.)
     # # print(rb.delete(1))
     # print(rb.find(1).ticketID)
     # print("\n Delete")

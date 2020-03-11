@@ -74,3 +74,9 @@ ticket3.addItem(("Steak", 14.99))
 
 ticket4 = MealTicket("Jared's Lunch")
 ticket4.addItem(("Steak", 14.99))
+
+ticket5 = MealTicket("Jared's Lunch")
+ticket5.addItem(("Steak", 14.99))
+
+ticket6 = MealTicket("Jared's Lunch")
+ticket6.addItem(("Steak", 14.99))

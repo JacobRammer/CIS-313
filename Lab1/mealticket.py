@@ -51,6 +51,10 @@ ticket4 = MealTicket("Jared's Snacks")
 ticket4.addItem(("Dragon Fruit", 8.50))
 ticket4.addItem(("Strawberry", 3.25))
 ticket4.addItem(("Passion Fruit", 4.50))
+ticket5 = MealTicket("Jared's Snacks")
+ticket5.addItem(("Passion Fruit", 4.50))
+ticket6 = MealTicket("Jared's Snacks")
+ticket6.addItem(("Passion Fruit", 4.50))
 
 if (__name__ == "__main__"):
     def main():
