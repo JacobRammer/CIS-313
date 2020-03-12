@@ -1,153 +1,275 @@
 """
-Author: Sam Peters
-Description: Main that checks if your tree maintains RBTree properties
-Notes:
-The most useful part of this file is the verify_RB_properties() function
-which checks all 4 of the properties red black trees have.
-
-This is based off of Jared's skeleton code, if you don't have Sentinal nodes in your tree,
-your regular or Sentinal nodes don't have the isSentinal() method, or if your node class has child
-attributes named something other than leftChild and rightChild, you'll have to modify this code.
+Author: Jared Hall
+Date: 01/24/2020
+Description: A good skeleton code to get you started on RB-Trees
 """
-
 from mealticket import *
-from YOURLABFILENAME import *
-import random
 
 
-def random_insert(tree, values):
-    """
-    Inserts list of values in random order into the tree
-    """
-    shuffled_values = values.copy() # shuffle values
-    random.shuffle(shuffled_values)
-    for val in shuffled_values:
-        # Creating mealticket with a ticketname of "val" and a ticketID of val
-        ticket = MealTicket(str(val))
-        ticket.ticketID = val
-        status = tree.insert(ticket)
-        # if insert fails
-        if not status:
-            print(f"Insert of {val} failed")
+class Sentinal:
+    """This class builds the sentinal nodes and includes some nifty methods"""
 
-def random_find_delete(tree, values):
-    """
-    Finds and deletes list of values from tree in random order
-    """
-    shuffled_values = values.copy()
-    random.shuffle(shuffled_values)
-    for val in shuffled_values:
-        # Tries to call find() method to find a specific ticket
-        ticket = tree.find(val)
-        if type(ticket) is not MealTicket:
-            print(f"Find method did not return a mealticket when called with value {val}")
-        # Checking to see if the correct ticket was returned
-        elif str(val) != ticket.TicketName:
-            print(f"Find method returned wrong mealticket when searching for {val}")
+    def __init__(self):
+        """
+        The constructor for the sentinal class
+        A Sentinal is basically a place holder node (root and NULL)
+        """
+        self.key = None
+        self.value = None
+        self.leftChild = None
+        self.rightChild = None
+        self.parent = None
+        self.color = "black"
 
-        # Tries to call delete() method to delete a specific ticket
-        status = tree.delete(val)
-        if not status:
-            print(f"Delete of {val} failed")
-
-def verify_RB_properties(tree):
-    """
-    Tests to make sure that a given tree has the following properties:
-    1. The root node is black
-    2. No red node has a red parent
-    3. Every path from a node to its descendant Sentinal/Null nodes has the same
-    number of black nodes along the way
-    4. Every node has a .color attribute that is either "red" or "black"
-    """
-    # Checking if every node has a red or black attribute, comment this out if
-    # You're sure your tree does
-    if not test_colors(tree._root):
-        print("Tree did not meet 4th property")
-
-    # Checking if root node is black
-    elif tree._root.color != "black":
-        print("Tree did not meet 1st property")
-
-    # Checking if tree obeys second property
-    elif not test_redred(tree._root):
-        print("Tree did not meet second property")
-    # Checking to see if tree obeys 3rd property
-    elif not test_blackheight(tree._root):
-        print("Tree does not meet third property")
-
-def test_colors(node):
-    """ Recursively checks if every node has a color attribute """
-    # Shorter names for child nodes
-    l_child = node.leftChild
-    r_child = node.rightChild
-    # Checking if each node has the color attribute and that it's either "red" or "black"
-    node_has_color = hasattr(node, "color") and (node.color == "red" or node.color == "black")
-
-    # Recursively calling test_colors() on children if they aren't sentinals
-    l_has_color = test_colors(l_child) if not l_child.isSentinal() else True
-    r_has_color = test_colors(r_child) if not r_child.isSentinal() else True
-    return node_has_color and l_has_color and r_has_color
-
-def test_redred(node):
-    """ Recursively checks that no red node has a red parent """
-    if node.color == "red":
-        if node.parent.color == "red":
-            return False
-    if node.isSentinal():
+    def isSentinal(self):
+        """ This method makes it easy to check if a given node is a sentinal"""
         return True
-    else:
-        return test_colors(node.leftChild) and test_colors(node.rightChild)
 
-def test_blackheight(node):
-    """ Recursively checks blackheight property
-    Returns either False if something violated the property, or the number of
-    black nodes in one path from the current node to the bottom"""
-    node_value = 1 if node.color == "black" else 0
-    # Checking if we hit the bottom
-    if node.isSentinal():
-        return node_value
-    # Getting the number of nodes in left and right subtrees
-    left_subtree = test_blackheight(node.leftChild)
-    right_subtree = test_blackheight(node.rightChild)
 
-    # Checking if either subtree has a violation
-    if left_subtree is False or right_subtree is False:
+class RBNode(object):
+    """ Description: This is the node class for the Red-Black Tree."""
+
+    def __init__(self, ticket, color="red"):
+        """Constructor for the RBNode class"""
+        self.key = ticket.ticketID
+        self.value = ticket
+        self.color = color
+
+        # Build sentinal nodes and set the initial parent
+        self.parent = None
+        self.leftChild = Sentinal()
+        self.rightChild = Sentinal()
+
+    def __str__(self):
+        """ Returns a string rep of the node (for debugging ^,^) """
+        returnValue = "Node: {} - Color: {}\n".format(self.key, self.color)
+        returnValue += "Parent: {}\n".format(self.parent.key)
+        returnValue += "Left Child: {}\n".format(self.leftChild.key)
+        returnValue += "Right Child: {}\n".format(self.rightChild.key)
+        return returnValue
+
+    def isSentinal(self):
+        """makes it easy to check if a node is a sentinal"""
         return False
-    # Checking if the number of black nodes in paths to the bottom match up
-    elif left_subtree != right_subtree:
-        return False
-    else:
-        return node_value + left_subtree
 
+    def hasLeftChild(self):
+        """ This method returns true if the current node has a left child """
+        returnValue = False
+        if self.leftChild.parent == self and self.leftChild != self:
+            if not self.leftChild.isSentinal():
+                returnValue = True
+        return returnValue
+
+    def hasRightChild(self):
+        """ This method returns true|false depending on if the current
+            node has a right child or not."""
+        returnValue = False
+        if self.rightChild.parent == self and self.rightChild != self:
+            if not self.rightChild.isSentinal():
+                returnValue = True
+        return returnValue
+
+    def hasOnlyOneChild(self):
+        """ Returns True if the current node has only one child."""
+        LC = self.hasLeftChild()
+        RC = self.hasRightChild()
+        return (LC and not RC) or (not LC and RC)
+
+    def hasBothChildren(self):
+        """ Returns True if the current node has both children"""
+        return self.hasLeftChild() and self.hasRightChild()
+
+    def isLeaf(self):
+        """ Returns true if the current node is a leaf node."""
+        returnValue = False
+        if self.rightChild.isSentinal() and self.leftChild.isSentinal():
+            returnValue = True
+        return returnValue
+
+    def isLeftChild(self):
+        """Returns true if the current node is a left child"""
+        return self.parent.leftChild == self
+
+    def isRightChild(self):
+        """Returns true if the current node is a right child"""
+        return self.parent.rightChild == self
+
+
+class RedBlackTree:
+    """ Skeleton code for the red-black tree"""
+
+    def __init__(self):
+        """ The constructor for the red-black tree"""
+        self._root = None
+        self.size = 0
+        self.output = ""
+
+        # All leaf nodes point to self.sentinel, rather than 'None'
+        # Parent of root should also be self.sentinel
+        self.sentinel = Sentinal()
+        self.sentinel.parent = self.sentinel
+        self.sentinel.leftChild = self.sentinel
+        self.sentinel.rightChild = self.sentinel
+
+    def traverse(self, mode):
+        """The traverse method returns a string rep of the tree according to
+           the specified mode
+        """
+        self.output = ""
+        if type(mode) == str:
+            if mode == "in-order":
+                self.inorder(self._root)
+            elif mode == "pre-order":
+                self.preorder(self._root)
+            elif mode == "post-order":
+                self.postorder(self._root)
+        else:
+            self.output = "  "
+        return self.output[:-2]
+
+    def inorder(self, node):
+        """ computes the preorder traversal """
+        if node.key is not None:
+            self.inorder(node.leftChild)
+            self.output += str(node.key) + ", "
+            self.inorder(node.rightChild)
+
+    def preorder(self, node):
+        """computes the pre-order traversal"""
+        if node.key is not None:
+            self.output += str(node.key) + ", "
+            self.preorder(node.leftChild)
+            self.inorder(node.rightChild)
+
+    def postorder(self, node):
+        """ compute postorder traversal"""
+        if node.key is not None:
+            self.postorder(node.leftChild)
+            self.postorder(node.rightChild)
+            self.output += str(node.key) + ", "
+
+    def findSuccessor(self, node):
+        """
+        This method returns the sucessor of a given node.
+        """
+        successor = None
+        # if node has a right child
+        if node.hasRightChild():
+            # then successor is the min of the right subtree
+            currentNode = node.rightChild
+            while currentNode.hasLeftChild():
+                currentNode = currentNode.leftChild
+            successor = currentNode
+        elif node.parent:  # node has no right child, but has a parent
+            if node.isLeftChild():  # node is a left child
+                successor = self.parent  # then succ is the parent
+            else:  # node is right child, and has not right child
+                # remove parent's rightChild reference
+                node.parent.rightChild = None
+                # recursively find call findSuccessor on parent
+                successor = self.findSuccessor(node.parent)
+                # replace parent's rightChild reference
+                node.parent.rightChild = node
+        return successor
+
+    # =========================== Mandatory Methods ============================
+    # You write these.
+    def find(self, ticketID):
+        """ Hints: This method returns either a stored mealticket or False
+                   just like in the BST lab. Start at the root then make
+                   your way to the RBNode whose ticketID matches the input.
+                   Then return the value of that node.
+        """
+        # create your return var
+        # start at root
+        # while ticketID != currentNode.key
+        #    go eiter right or left depending on comparison.
+        #    e.g. currentNode.key > ticketID -> curentNode = cn.left or cn.right
+        #    break when you hit a sentinal
+        # return either false or currentnode.value
+        pass
+
+    def delete(self, key):
+        """ The delete method starts out the same as BST but then you need
+            to restructure your RBT.
+        """
+        pass
+
+    def insert(self, key):
+        """
+        Hints: add a key to the tree. Don't forget to fix up the tree
+        and balance the nodes.
+        """
+        pass
+
+    def leftRotate(self, x):
+        """ perform a left rotation from a given node"""
+
+        # todo may need to change x.isSentinal back to self.none
+        y = x.right
+        x.right = y.left
+
+        if y.left is not x.isSentinal():
+            y.left.parent = x
+        y.parent = x.parent
+        if x.parent is x.isSentinal():
+            self._root = y
+        elif x == x.parent.left:
+            x.parent.left = y
+        else:
+            x.parent.right = y
+        y.left = x
+        x.p = y
+
+    def rightRotate(self, x):
+        """ perform a right rotation from a given node"""
+
+        y = x.left
+        x.left = y.right
+        if y.right is not x.isSentinal():
+            y.right.parent = x
+        y.parent = x.parent
+        if x.parent is x.isSentinal():
+            self._root = y
+        elif x == x.parent.right:
+            x.p.right = y
+        else:
+            x.parent.left = y
+        y.right = x
+        x.parent = y
+
+    # ========================== Additional Methods ============================
+    # I think these are useful. Implement them if you want.
+    def findNode(self, ticketID):
+        """
+        Hints: This method finds a node and returns it or
+               false if no node is found. First do a BST search for the RBNode
+               with the same key as the input ticketID. Then return that node.
+        """
+        # similar to find but returns a node (used internally for find sucessor
+        # and delete). Same steps as above, just return currentNode
+        pass
+
+    def insertFixup(self, currentNode):
+        """Hint: write a function to balance your tree after inserting"""
+        pass
+
+    def deleteFixup(self, currentNode):
+        """
+        Hint: receives a node and fixes up the tree,
+              balancing from that node.
+        """
+        pass
 
 
 def main():
-    """ Main function that runs all the other functions """
+    """
+    Main function for RB tree
+    :return: void
+    """
 
-    values = [i for i in range(100)]
-    tree = RedBlackTree()
-    """ COMMENT OUT EVERYTHING BELOW IF YOU HAVEN'T FINISHED INSERT YET """
-    print("Testing insert")
-    # Testing insertion to see if anything breaks, inserts 100 numbers in random order
-    random_insert(tree, values)
-    # Checking if tree still has RB properties after inserting 100 numbers in random order
-    verify_RB_properties(tree)
-
-    """ COMMENT OUT EVERYTHING BELOW IF YOU HAVEN'T FINISHED FIND OR DELETE YET """
-    print("Testing find and delete methods")
-    # Randomly removes half of the nodes
-    halfof_values = values[:len(values)//2]
-    random_find_delete(tree, halfof_values)
-    # Verifying rbtree properties are still intact
-    verify_RB_properties(tree)
-
-    # Repeating the process for the other 50 nodes
-    other_values = values[len(values)//2:]
-    random_find_delete(tree, other_values)
-    verify_RB_properties(tree)
-
-    # At this point your tree should be empty, maybe add a check to see if that's true
-
+    print(ticket1.ticketID)
 
 if __name__ == "__main__":
+    # Write a main to test your code. Share on Piazza if you wanna ^,^
     main()

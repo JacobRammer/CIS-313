@@ -1,6 +1,6 @@
 """
 Jacob Rammer
-3/8/2020
+3/7/2020
 Thanks for the skeleton code!
 I am opting not to use to to stay as close
 to the book implementation as possible
@@ -8,8 +8,6 @@ to the book implementation as possible
 
 from mealticket import *
 
-
-# todo remove function prototypes
 
 class RBNode:
     """
@@ -27,12 +25,12 @@ class RBNode:
         ticketID = 0
         if type(ticket) is MealTicket:  # to prevent crash on declaration
             ticketID = ticket.ticketID
-        self.key = ticket
+        self.key = ticket  # mealticket
         self.value = ticketID
         self.color = color.lower()
         self.parent = None
-        self.left = None
-        self.right = None
+        self.leftChild = None
+        self.rightChild = None
 
 
 class RedBlackTree:
@@ -49,50 +47,50 @@ class RedBlackTree:
         self._root = self.nil
         self.walk = ""
 
-    def _leftRotate(self, x):
+    def _leftRotate(self, CurrentNode):
         """
         Rotate a node to the left
         :param node: RBNode
         :return: void
         """
 
-        y = x.right
-        x.right = y.left
+        y = CurrentNode.rightChild
+        CurrentNode.rightChild = y.leftChild
 
-        if y.left != self.nil:
-            y.left.parent = x
-        y.parent = x.parent
-        if x.parent == self.nil:
+        if y.leftChild != self.nil:
+            y.leftChild.parent = CurrentNode
+        y.parent = CurrentNode.parent
+        if CurrentNode.parent == self.nil:
             self._root = y
-        elif x == x.parent.left:
-            x.parent.left = y
+        elif CurrentNode == CurrentNode.parent.leftChild:
+            CurrentNode.parent.leftChild = y
         else:
-            x.parent.right = y
-        y.left = x
-        x.parent = y
+            CurrentNode.parent.rightChild = y
+        y.leftChild = CurrentNode
+        CurrentNode.parent = y
 
-    def _rightRotate(self, x):
+    def _rightRotate(self, currentNode):
         """
         Rotate a note to the left.
         Same as _rotateLeft except left is replaced with right
-        :param x: RBNode
+        :param currentNode: RBNode
         :return: void
         """
 
-        y = x.left
-        x.left = y.right
+        y = currentNode.leftChild
+        currentNode.leftChild = y.rightChild
 
-        if y.right != self.nil:
-            y.right.parent = x
-        y.parent = x.parent
-        if x.parent == self.nil:
+        if y.rightChild != self.nil:
+            y.rightChild.parent = currentNode
+        y.parent = currentNode.parent
+        if currentNode.parent == self.nil:
             self._root = y
-        elif x == x.parent.right:
-            x.parent.right = y
+        elif currentNode == currentNode.parent.rightChild:
+            currentNode.parent.rightChild = y
         else:
-            x.parent.left = y
-        y.right = x
-        x.parent = y
+            currentNode.parent.leftChild = y
+        y.rightChild = currentNode
+        currentNode.parent = y
 
     def insert(self, ticket):
         """
@@ -109,27 +107,27 @@ class RedBlackTree:
             while x != self.nil:
                 y = x
                 if ticket.key.ticketID < x.key.ticketID:
-                    x = x.left
+                    x = x.leftChild
                     returnValue = True
                 else:
-                    x = x.right
+                    x = x.rightChild
                     returnValue = True
             ticket.parent = y
             if y == self.nil:
                 self._root = ticket
                 returnValue = True
             elif ticket.key.ticketID < y.key.ticketID:
-                y.left = ticket
+                y.leftChild = ticket
                 returnValue = True
             else:
-                y.right = ticket
+                y.rightChild = ticket
                 returnValue = True
-            ticket.left = self.nil
-            ticket.right = self.nil
+            ticket.leftChild = self.nil
+            ticket.rightChild = self.nil
             ticket.color = "red"
             # print(f"Z is {z}")
             # print(f"hgv {ticket}")
-            # self.insertFixup(ticket)
+            self.insertFixup(ticket)
             returnValue = True
 
         return returnValue
@@ -137,6 +135,10 @@ class RedBlackTree:
     def insertFixup(self, currentNode):
         """
         Fix the tree after inserting a mealticket
+        Cases:
+        1: When the uncle of y is red
+        2: Uncle y of the current node is black and is a right child
+        3: Uncle y of the current node is black and is a left child
         :param currentNode: RBNode to perform the fixup
         :return: void
         """
@@ -147,52 +149,58 @@ class RedBlackTree:
 
         while currentNode.parent.color == "red":
             # print(f"Z2 is {z}")
-            if currentNode.parent == currentNode.parent.parent.left:
-                y = currentNode.parent.parent.right
+            if currentNode.parent == currentNode.parent.parent.leftChild:
+                y = currentNode.parent.parent.rightChild
                 if y.color == "red":
+                    '''Case 1'''
                     currentNode.parent.color = "black"
                     y.color = "black"
                     currentNode.parent.parent.color = "red"
                     currentNode = currentNode.parent.parent
                 else:
-                    if currentNode == currentNode.parent.right:
+                    if currentNode == currentNode.parent.rightChild:
+                        '''Case 2'''
                         currentNode = currentNode.parent
                         self._leftRotate(currentNode)
+                    '''Case 3'''
                     currentNode.parent.color = "black"
                     currentNode.parent.parent.color = "red"
                     self._rightRotate(currentNode.parent.parent)
             else:  # this is the same as above but left and right swap
-                y = currentNode.parent.parent.left
+                y = currentNode.parent.parent.leftChild
                 if y.color == "red":
+                    '''Case 1'''
                     currentNode.parent.color = "black"
                     y.color = "black"
                     currentNode.parent.parent.color = "red"
                     currentNode = currentNode.parent.parent
                 else:
-                    if currentNode == currentNode.parent.left:
+                    if currentNode == currentNode.parent.leftChild:
+                        '''Case 2'''
                         currentNode = currentNode.parent
                         self._rightRotate(currentNode)
+                    '''Case 3'''
                     currentNode.parent.color = "black"
                     currentNode.parent.parent.color = "red"
                     self._leftRotate(currentNode.parent.parent)
         self._root.color = "black"
 
-    def transplant(self, u, v):
+    def transplant(self, nodeOne, nodeTwo):
         """
         Transplant a node during a deletion to maintain
         RBTree properties
-        :param u: RBTNode 1
-        :param v: RBTNode 2
+        :param nodeOne: RBTNode 1
+        :param nodeTwo: RBTNode 2
         :return: True
         """
 
-        if u.parent == self.nil:
-            self._root = v
-        elif u == u.parent.left:
-            u.parent.right = v
+        if nodeOne.parent == self.nil:
+            self._root = nodeTwo
+        elif nodeOne == nodeOne.parent.leftChild:
+            nodeOne.parent.leftChild = nodeTwo
         else:
-            u.parent.right = v
-        v.parent = u.parent
+            nodeOne.parent.rightChild = nodeTwo
+        nodeTwo.parent = nodeOne.parent
 
         return True  # since we're just swapping, always true
 
@@ -208,84 +216,101 @@ class RedBlackTree:
         returnValue = False
         tempVal = ticketID  # to validate input against 0
         ticketID = self._search(ticketID, self._root)
-        if ticketID > 0:
+        if type(ticketID) is RBNode:
+            # print("sdfg")
             y = ticketID
             original_color = y.color
-            if ticketID.left == self.nil:
-                x = ticketID.right
-                self.transplant(ticketID, ticketID.right)
-            elif ticketID.right == self.nil:
-                x = ticketID.left
-                self.transplant(ticketID, ticketID.left)
+            if ticketID.leftChild == self.nil:
+                x = ticketID.rightChild
+                self.transplant(ticketID, ticketID.rightChild)
+            elif ticketID.rightChild == self.nil:
+                x = ticketID.leftChild
+                self.transplant(ticketID, ticketID.leftChild)
             else:
-                y = self.min(ticketID.right)
+                y = self.min(ticketID.rightChild)
                 original_color = y.color
-                x = y.right
+                x = y.rightChild
                 if y.parent == ticketID:
                     x.parent = y
                 else:
-                    self.transplant(y, y.right)
-                    y.right = ticketID.right
-                    y.right.parent = y
+                    self.transplant(y, y.rightChild)
+                    y.rightChild = ticketID.rightChild
+                    y.rightChild.parent = y
                 self.transplant(ticketID, y)
-                y.left = ticketID.left
-                y.left.parent = y
+                y.leftChild = ticketID.leftChild
+                y.leftChild.parent = y
                 y.color = ticketID.color
             if original_color == "black":
                 self.deleteFixup(x)
             returnValue = True
         return returnValue
 
-    def deleteFixup(self, x):
+    def deleteFixup(self, CurrentNode):
         """
         Restore the properties of the RB tree upon
         node deletion
-        :param x: node to check
+        Cases:
+        1: the sibling of x, w is red
+        2: The sibling of x, w is black, and the children of w is are black
+        3: The sibling of x, w is black, the left child of w is red, r = red
+        4: The sibling of x, w is black and the right child of w is red
+        :param CurrentNode: node to check
         :return: void
         """
 
-        while x != self._root and x.color == "black":
-            if x == x.parent.left:
-                w = x.parent.right
+        while CurrentNode != self._root and CurrentNode.color == "black":
+            if CurrentNode == CurrentNode.parent.leftChild:
+                w = CurrentNode.parent.rightChild
                 if w.color == "red":
+                    '''Case 1'''
                     w.color = "black"
-                    x.parent.color = "red"
-                    self._leftRotate(x.parent)
-                    w = x.parent.right
-                if w.left.color == "black" and w.right.color == "black":
+                    CurrentNode.parent.color = "red"
+                    self._leftRotate(CurrentNode.parent)
+                    w = CurrentNode.parent.rightChild
+                if w.leftChild.color == "black" and w.rightChild.color == \
+                        "black":
+                    '''Case 2'''
                     w.color = "red"
-                    x = x.parent
-                elif w.right.color == "black":
-                    w.left.color = "black"
-                    w.color = "red"
-                    self._rightRotate(w)
-                    w = x.parent.right
-                w.color = x.parent.color
-                x.parent.color = "black"
-                w.right.color = "black"
-                self._leftRotate(x.parent)
-                x = self._root
-            else:  # same as above but left and right are swapped
-                w = x.parent.left
-                if w.color == "red":
-                    w.color = "black"
-                    x.parent.color = "red"
-                    self._rightRotate(x.parent)
-                if w.right.color == "black" and w.left.color == "black":
-                    w.color = "red"
-                    x = x.parent
+                    CurrentNode = CurrentNode.parent
                 else:
-                    if w.left.color == "black":
-                        w.right.color = "black"
+                    if w.rightChild.color == "black":
+                        '''Case 3'''
+                        w.leftChild.color = "black"
+                        w.color = "red"
+                        self._rightRotate(w)
+                        w = CurrentNode.parent.rightChild
+                    '''Case 4'''
+                    w.color = CurrentNode.parent.color
+                    CurrentNode.parent.color = "black"
+                    w.rightChild.color = "black"
+                    self._leftRotate(CurrentNode.parent)
+                    CurrentNode = self._root
+            else:  # same as above but left and right are swapped
+                w = CurrentNode.parent.leftChild
+                if w.color == "red":
+                    '''Case 1'''
+                    w.color = "black"
+                    CurrentNode.parent.color = "red"
+                    self._rightRotate(CurrentNode.parent)
+                if w.rightChild.color == "black" and w.leftChild.color \
+                        == "black":
+                    '''Case 2'''
+                    w.color = "red"
+                    CurrentNode = CurrentNode.parent
+                else:
+                    if w.leftChild.color == "black":
+                        '''Case 3'''
+                        w.rightChild.color = "black"
                         w.color = "red"
                         self._leftRotate(w)
-                        w = x.parent.left
-                    w.color = x.parent.color
-                    x.parent.color = "black"
-                    w.left.color = "black"
-                    self._rightRotate(x.parent)
-                    x = self._root
-        x.color = "black"
+                        w = CurrentNode.parent.leftChild
+                    '''Case 4'''
+                    w.color = CurrentNode.parent.color
+                    CurrentNode.parent.color = "black"
+                    w.leftChild.color = "black"
+                    self._rightRotate(CurrentNode.parent)
+                    CurrentNode = self._root
+        CurrentNode.color = "black"
 
     def min(self, currentTree):
         """
@@ -294,8 +319,8 @@ class RedBlackTree:
         :return: Node with minimum value
         """
 
-        while currentTree.left != self.nil:
-            currentTree = currentTree.left
+        while currentTree.leftChild != self.nil:
+            currentTree = currentTree.leftChild
         return currentTree
 
     def max(self, currentTree):
@@ -306,8 +331,8 @@ class RedBlackTree:
         :return: node with mealticket
         """
 
-        while currentTree.right != self.nil:
-            currentTree = currentTree.right
+        while currentTree.rightChild != self.nil:
+            currentTree = currentTree.rightChild
         return currentTree
 
     def _search(self, id, node):
@@ -322,12 +347,12 @@ class RedBlackTree:
         # print(f"id {type(id)}")
         if type(id) is int:
             # print("he")
-            while node != self.nil and node.value != id:
-                if id < node.value:
-                    node = node.left
+            while node != self.nil and node.key.ticketID != id:
+                if id < node.key.ticketID:
+                    node = node.leftChild
                 else:
-                    node = node.right
-            if node.value == id:  # so i can return false if not found
+                    node = node.rightChild
+            if node.key:  # so i can return false if not found
                 returnValue = node
         return returnValue
 
@@ -345,9 +370,9 @@ class RedBlackTree:
             # print("he")
             while node != self.nil and node.value != id:
                 if id < node.value:
-                    node = node.left
+                    node = node.leftChild
                 else:
-                    node = node.right
+                    node = node.rightChild
             if node.value == id:  # so i can return false if not found
                 returnValue = node.key
         return returnValue
@@ -381,8 +406,8 @@ class RedBlackTree:
             node = self._root
         if node is not self.nil:
             self.walk += f"{str(node.key.ticketID)}: {node.color}, "
-            self.preOrder(node.left)
-            self.preOrder(node.right)
+            self.preOrder(node.leftChild)
+            self.preOrder(node.rightChild)
         return self.walk[:-2]
 
     def postOrder(self, node):
@@ -395,8 +420,8 @@ class RedBlackTree:
         if type(node) is RedBlackTree:
             node = self._root
         if node is not self.nil:
-            self.postOrder(node.left)
-            self.postOrder(node.right)
+            self.postOrder(node.leftChild)
+            self.postOrder(node.rightChild)
             self.walk += f"{str(node.key.ticketID)}: {node.color}, "
         return self.walk[:-2]
 
@@ -407,24 +432,27 @@ class RedBlackTree:
         """
 
         if node is not self.nil:
-            self.inOrder(node.left)
+            self.inOrder(node.leftChild)
             self.walk += f"{str(node.key.ticketID)}: {node.color}, "
-            self.inOrder(node.right)
+            self.inOrder(node.rightChild)
 
         return self.walk[:-2]
 
 
 def main():
     rb = RedBlackTree()
-    l = generateMealTickets(15)
-    for i in range(15):
-        # print(l[i])
-        print(rb.insert(l[i]))
-    print(rb.delete(5))
-    # print(rb._search(5, rb._root))
+    l = generateMealTickets(10)
+    j = 0
+    for i in range(10):
+        print(f"insert {l[i].ticketID}")
+        rb.insert(l[i])
+    for i in range(10):
+        j = randint(1, 20)
+        print(f"Delete {j}")
+        rb.delete(j)
     print(rb.traverse("in-order"))
-    # print(rb.traverse("post-order"))
-    # print(rb.traverse("pre-order"))
+    print(rb.traverse("post-order"))
+    print(rb.traverse("pre-order"))
     # ticket1.ticketID = 10
     # print(f"Insert {rb.insert(ticket1)}")
     # rb.delete(10)
@@ -434,7 +462,7 @@ def main():
     # # print(f"Insert {rb.insert(ticket5)}")
     # # rb.insertFixup(rb._root)
     # # print(rb.insert(ticket6))
-    # # print(rb._root.parent.right)
+    # # print(rb._root.parent.rightChild)
     # # print(rb.delete(10))
     # # print(rb.find(2))
     # # print(f"Find {rb.find(18)}")
@@ -442,11 +470,11 @@ def main():
     # # print(f"rb._root.color: {rb._root.color}")
     # # print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
     # #
-    # # print(f"\nrb._root.right.color: {rb._root.right.color}")
-    # # print(f"rb._root.right.value: {rb._root.right.value}")
+    # # print(f"\nrb._root.rightChild.color: {rb._root.rightChild.color}")
+    # # print(f"rb._root.rightChild.value: {rb._root.rightChild.value}")
     # #
-    # # print(f"\nrb._root.left.color: {rb._root.left.color}")
-    # # print(f"rb._root.left.value: {rb._root.left.value}")
+    # # print(f"\nrb._root.leftChild.color: {rb._root.leftChild.color}")
+    # # print(f"rb._root.leftChild.value: {rb._root.leftChild.value}")
     # #
     # print(rb.traverse("in-order"))
     # print(rb.traverse("pre-order"))
@@ -459,13 +487,13 @@ def main():
     # print("\n Delete")
     # print(f"rb._root.color: {rb._root.color}")
     # print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
-    # print(f"\nrb._root.right.color: {rb._root.left.color}")
-    # print(f"rb._root.right.value: {rb._root.left.value}")
+    # print(f"\nrb._root.rightChild.color: {rb._root.leftChild.color}")
+    # print(f"rb._root.rightChild.value: {rb._root.leftChild.value}")
     # print("\nNew insert")
     # print(f"rb._root.color: {rb._root.color}")
     # print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
-    # print(f"\nrb._root.right.color: {rb._root.right.color}")
-    # print(f"rb._root.right.value: {rb._root.right.value}")
+    # print(f"\nrb._root.rightChild.color: {rb._root.rightChild.color}")
+    # print(f"rb._root.rightChild.value: {rb._root.rightChild.value}")
 
     # print(rb._search(1, rb._root).value)
 
@@ -473,25 +501,23 @@ def main():
     # print(f"rb._root.color: {rb._root.color}")
     # print(f"rb._root.key.ticketID: {rb._root.key.ticketID}")
     #
-    # print(f"\nrb._root.right.color: {rb._root.right.color}")
-    # print(f"rb._root.right.value: {rb._root.right.value}")
+    # print(f"\nrb._root.rightChild.color: {rb._root.rightChild.color}")
+    # print(f"rb._root.rightChild.value: {rb._root.rightChild.value}")
     #
-    # print(f"\nrb._root.left.color: {rb._root.left.color}")
-    # print(f"rb._root.left.value: {rb._root.left.value}")
-    #
-    # print(f"\nrb._root.right.right.color: {rb._root.right.right.color}")
-    # print(f"rb._root.right.right.value: {rb._root.right.right.value}")
+    # print(f"\nrb._root.leftChild.color: {rb._root.leftChild.color}")
+    # print(f"rb._root.leftChild.value: {rb._root.leftChild.value}")
 
     # print(rb.min(rb._root).value)
     # print(rb.max(rb._root).value)
 
-    # print(rb._root.right.key.ticketID)
-    # print(rb._root.left.key.ticketID)
-    # print(rb._root.parent.right.color)
+    # print(rb._root.rightChild.key.ticketID)
+    # print(rb._root.leftChild.key.ticketID)
+    # print(rb._root.parent.rightChild.color)
     # print(rb.insert(ticket1))
     # print(rb._root.key.ticketID)
-    # print(rb._root.right.key.ticketID)
-    # print(rb._root.left.key.ticketID)
+    # print(rb._root.rightChild.key.ticketID)
+    # print(rb._root.leftChild.key.ticketID)
 
 
-main()
+if __name__ == "__main__":
+    main()
